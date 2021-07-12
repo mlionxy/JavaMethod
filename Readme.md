@@ -4,5 +4,6 @@
 
 ### Java
 
-* `20210712`[Java 中垃圾回收机制中如何判断对象需要回收？常见的 GC 回收算法有哪些？]()
-* `20210712`[Java 中垃圾回收机制中如何判断对象需要回收？常见的 GC 回收算法有哪些？]()
+* `20210712`[Java 中垃圾回收机制中如何判断对象需要回收？常见的 GC 回收算法有哪些？](https://github.com/mlionxy/JavaMethod/tree/master/java)
+* 
+* `20210712`[hashmap 和 hashtable 的区别是什么？](https://github.com/mlionxy/JavaMethod/tree/master/java)
