@@ -101,3 +101,52 @@ HashMap为了提高计算效率，将哈希表的大小固定为了2的幂，这
 
 在HashMap中如果冲突数量小于8，则是以链表方式解决冲突。而当冲突大于等于8时，就会将冲突的Entry转换为红黑树进行存储。而又当数量小于6时，则又转化为链表存储。
 在HashTable中，都是以链表方式存储。
+
+## HashMap 与 ConcurrentHashMap 的实现原理是怎样的？ConcurrentHashMap 是如何保证线程安全的？
+
+### HashMap实现原理
+
+**1.存储结构**
+
+HashMap采用Entry数组存储key-value对，每一个键值对组成了一个Entry实体，Entry类实际上是一个单向的链表结构，它具有next指针，可以链接下一个Entry实体，以此来解决hash冲突的问题。
+数组存储区间是连续的，占用内存严重，故空间复杂度很大。但数组的二分查找时间复杂度小，为O(1),数组的特点是，寻址容易，插入删除困难。
+链表存储区间离散，占用内存比较宽松，故空间复杂度小，但时间复杂度很大，达O(N)。链表的特点是，寻址困难，插入和删除容易。
+HashMap数据结构是由数组+链表组成，一个长度16的数组中，每一个元素存储的是链表的头节点，通过计算hash(key.hashCode())%len获得，也就是元素key的hash值对数组长度取余得到。比如12，28，108，140它们计算结果都是12所以它们存储在数组下标为12的位置。
+Entry里面主要属性key，value，hash，next，第一个键值对A进来，通过计算其key的hash得到的index=0，Entry[0] = A。键值对B，通过计算其index等于0，HashMap会这样做:B.next = A,Entry[0] = B,如果又进来C,index也等于0,那么C.next = B,Entry[0] = C
+
+**2.JDK 1.8的 改变**
+
+在Jdk1.8中HashMap数据结构存储方式为数组+链表+红黑树的存储方式，当链表的长度超过8时，将链表转换为红黑树。
+
+### ConcurrentHashMap实现原理，如何保证线程安全
+
+**1.存储结构**
+
+ConcurrentHashMap和HashMap实现上类似，最主要的差别是ConcurrentHashMap采用了分段锁（Segment），每个分段锁维护着几个桶（HashEntry），
+多个线程可以同时访问不同分段锁上的桶，从而使其并发度更高（并发度就是 Segment 的个数）。Segment继承自ReentrantLock。默认的并发级别为16，也就是说默认创建16个Segment。
+
+**2.size操作**
+
+每个Segment维护了一个count变量来统计该Segment中的键值对个数。在执行size操作时，需要遍历所有Segment然后把count累计起来。ConcurrentHashMap在执行size操作时先尝试不加锁，如果连续两次不加锁操作得到的结果一致，那么可以认为这个结果是正确的。
+尝试次数使用RETRIES_BEFORE_LOCK定义，该值为2，retries初始值为-1，因此尝试次数为3。如果尝试的次数超过3次，就需要对每个Segment加锁。
+
+**3.JDK 1.8 的改动**
+
+JDK1.7使用分段锁机制来实现并发更新操作，核心类为Segment，它继承自重入锁ReentrantLock，并发度与Segment数量相等。JDK1.8使用了CAS操作来支持更高的并发度，在CAS操作失败时使用内置锁synchronized。
+JDK1.8的实现也在链表过长时会转换为红黑树。
+
+## 简述 Java 的反射机制及其应用场景
+
+### 反射的机制
+
+Java反射机制的核心是在程序运行时动态加载类并获取类的详细信息，从而操作类或对象的属性和方法。本质是JVM得到class对象之后，再通过class对象进行反编译，从而获取对象的各种信息。
+Class和java.lang.reflect一起对反射提供了支持，java.lang.reflect类库主要包含了以下三个类：
+* Field：可以使用get()和set()方法读取和修改Field对象关联的字段。
+* Method：可以使用invoke()方法调用与Method对象关联的方法。
+* Constructor：可以用Constructor的newInstance()创建新的对象。
+
+### 反射的应用
+
+* 反射让开发人员可以通过外部类的全路径名来创建对象，并使用这些类，实现一些扩展的功能。
+* 反射让开发人员可以枚举出类的全部成员，包括构造函数，属性，方法。以帮助开发者写出正确的代码。
+* 测试时可以利用反射API访问类的私有成员。以保证测试代码覆盖率。
