@@ -11,3 +11,7 @@
 * `20210713`[HashMap 与 ConcurrentHashMap 的实现原理是怎样的？ConcurrentHashMap 是如何保证线程安全的？](https://github.com/mlionxy/JavaMethod/tree/master/java)
 
 * `20210713`[简述 Java 的反射机制及其应用场景](https://github.com/mlionxy/JavaMethod/tree/master/java)
+
+* `20210714`[Java 类的加载流程是怎样的？什么是双亲委派机制？](https://github.com/mlionxy/JavaMethod/tree/master/java)
+
+* `20210714`[HashMap 实现原理，为什么使用红黑树？](https://github.com/mlionxy/JavaMethod/tree/master/java)
