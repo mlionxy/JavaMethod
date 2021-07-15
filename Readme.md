@@ -15,3 +15,7 @@
 * `20210714`[Java 类的加载流程是怎样的？什么是双亲委派机制？](https://github.com/mlionxy/JavaMethod/tree/master/java)
 
 * `20210714`[HashMap 实现原理，为什么使用红黑树？](https://github.com/mlionxy/JavaMethod/tree/master/java)
+
+* `20210715`[Synchronized 关键字底层是如何实现的？它与 Lock 相比优缺点分别是什么？](https://github.com/mlionxy/JavaMethod/tree/master/java)
+
+* `20210715`[HashMap 1.7 / 1.8 的实现区别 ](https://github.com/mlionxy/JavaMethod/tree/master/java)
