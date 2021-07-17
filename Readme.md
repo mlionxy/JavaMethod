@@ -21,5 +21,9 @@
 * `20210715`[HashMap 1.7 / 1.8 的实现区别](https://github.com/mlionxy/JavaMethod/tree/master/java)
 
 * `20210716`[简述 BIO, NIO, AIO 的区别](https://github.com/mlionxy/JavaMethod/tree/master/java)
-* 
+
 * `20210716`[Java 中接口和抽象类的区别](https://github.com/mlionxy/JavaMethod/tree/master/java)
+
+* `20210717`[Java 常见锁有哪些？ReetrantLock 是怎么实现的？](https://github.com/mlionxy/JavaMethod/tree/master/java)
+
+* `20210717`[Java 线程间有多少通信方式？](https://github.com/mlionxy/JavaMethod/tree/master/java)
