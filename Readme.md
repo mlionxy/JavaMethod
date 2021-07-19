@@ -29,3 +29,7 @@
 * `20210717`[Java 线程间有多少通信方式？](https://github.com/mlionxy/JavaMethod/tree/master/java)
 
 * `20210718`[简述 ArrayList 与 LinkedList 的底层实现以及常见操作的时间复杂度](https://github.com/mlionxy/JavaMethod/tree/master/java)
+
+* `20210719`[简述 JVM 的内存模型 JVM 内存是如何对应到操作系统内存的？](https://github.com/mlionxy/JavaMethod/tree/master/java)
+
+* `20210719`[说说 List,Set,Map 三者的区别及如何选用？](https://github.com/mlionxy/JavaMethod/tree/master/java)
