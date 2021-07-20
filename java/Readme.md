@@ -415,3 +415,441 @@ jvm的内存是分布在操作系统的堆中，jvm的设计的模型其实就�
 
 主要根据集合的特点来选用，比如我们需要根据键值获取到元素值时就选用 Map 接口下的集合，需要排序时选择 TreeMap,不需要排序时就选择 HashMap,需要保证线程安全就选用 ConcurrentHashMap。
 当我们只需要存放元素值时，就选择实现Collection 接口的集合，需要保证元素唯一时选择实现 Set 接口的集合比如 TreeSet 或 HashSet，不需要就选择实现 List 接口的比如 ArrayList 或 LinkedList，然后再根据实现这些接口的集合的特点来选用。
+
+## 手写生产者消费者模型
+
+五种方式实现生产者消费者模型
+
+### 1.wait()和notify()方法
+
+- 使用synchronized来进行同步；
+- 缓冲区满和为空时都调用wait()方法等待；
+- 当生产者生产了一个产品或者消费者消费了一个产品之后会唤醒所有线程。
+
+```java
+package BasicKnowleage;
+
+/** Method 1: synchronized + wait & notifyAll **/
+public class ProducerConsumer01 {
+  private static Integer count = 0;
+  private static String LOCK = "lock";
+  private static final Integer FULL = 10;
+  private static final Integer EMPTY = 0;
+
+  class Producer implements Runnable {
+    @Override
+    public void run() {
+      for(int i = 0; i < 10; i++) {
+        try {
+          Thread.sleep(3000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        synchronized (LOCK) {
+          while (count == FULL) {
+            try {
+              LOCK.wait();
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+            }
+          }
+          count ++;
+          System.out.println(Thread.currentThread().getName() + " producer number: " + count);
+          LOCK.notifyAll();
+        }
+      }
+    }
+  }
+
+  class Consumer implements Runnable {
+
+    @Override
+    public void run() {
+      for (int i = 0; i < 10; i++) {
+        try {
+          Thread.sleep(3000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        synchronized (LOCK){
+          while (count == EMPTY) {
+            try {
+              LOCK.wait();
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+            }
+          }
+          count --;
+          System.out.println(Thread.currentThread().getName() + " consumer number: " + count);
+          LOCK.notifyAll();
+        }
+      }
+    }
+  }
+
+  public static void main(String[] args) {
+    ProducerConsumer01 producerConsumer01 = new ProducerConsumer01();
+    new Thread(producerConsumer01.new Producer()).start();
+    new Thread(producerConsumer01.new Consumer()).start();
+    new Thread(producerConsumer01.new Producer()).start();
+    new Thread(producerConsumer01.new Consumer()).start();
+    new Thread(producerConsumer01.new Producer()).start();
+    new Thread(producerConsumer01.new Consumer()).start();
+    new Thread(producerConsumer01.new Producer()).start();
+    new Thread(producerConsumer01.new Consumer()).start();
+  }
+
+}
+```
+
+### 2. 可重入锁ReentrantLock
+- 创建一个锁对象ReentrantLock，注意；需要释放锁
+- 为这个锁创建两个条件Condition变量，一个为缓冲区notFull，一个为缓冲区notEmpty
+
+
+``` java
+package BasicKnowleage;
+
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
+/** Method 2: ReentrantLock + wait & notifyAll **/
+public class ProducerConsumer02 {
+
+  private static Integer count = 0;
+  private static ReentrantLock lock = new ReentrantLock();
+  private static final Integer FULL = 10;
+  private static final Integer EMPTY = 0;
+  private static Condition notFull = lock.newCondition();
+  private static Condition notEmpty = lock.newCondition();
+
+  class Producer implements Runnable {
+    @Override
+    public void run() {
+      for (int i = 0; i < 10; i++) {
+        try {
+          Thread.sleep(3000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        lock.lock();
+        try {
+          while (count == FULL) {
+            try {
+              notFull.await();
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+            }
+          }
+          count ++;
+          System.out.println(Thread.currentThread().getName() + " producer number: " + count);
+          notEmpty.signal();
+        } finally {
+          lock.unlock();
+        }
+      }
+    }
+  }
+
+  class Consumer implements Runnable {
+    @Override
+    public void run() {
+      for (int i =0; i< 10; i++) {
+        try {
+          Thread.sleep(3000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        lock.lock();
+        try {
+          while (count == EMPTY) {
+            try {
+              notEmpty.await();
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+            }
+          }
+          count --;
+          System.out.println(Thread.currentThread().getName() + " consumer number: " + count);
+          notFull.signal();
+        } finally {
+          lock.unlock();
+        }
+      }
+    }
+  }
+
+  public static void main(String[] args) {
+    ProducerConsumer02 producerConsumer02 = new ProducerConsumer02();
+    new Thread(producerConsumer02.new Producer()).start();
+    new Thread(producerConsumer02.new Consumer()).start();
+    new Thread(producerConsumer02.new Producer()).start();
+    new Thread(producerConsumer02.new Consumer()).start();
+    new Thread(producerConsumer02.new Producer()).start();
+    new Thread(producerConsumer02.new Consumer()).start();
+    new Thread(producerConsumer02.new Producer()).start();
+    new Thread(producerConsumer02.new Consumer()).start();
+  }
+}
+```
+
+### 3. 阻塞队列BlockingQueue
+- 定义一个阻塞队列，其中lockingQueue的put和take时阻塞的方法
+
+
+``` java
+package BasicKnowleage;
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+/** Method 3:  BlockingQueue **/
+public class ProducerConsumer03 {
+  private static Integer count = 0;
+  final BlockingQueue blockingDeque = new ArrayBlockingQueue<Integer>(10);
+
+  class Producer implements Runnable {
+    @Override
+    public void run() {
+      for (int i = 0; i < 10; i++) {
+        try {
+          Thread.sleep(3000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        try {
+          blockingDeque.put(1);
+          count ++;
+          System.out.println(Thread.currentThread().getName() + " producer number: " + count);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+
+  class Consumer implements Runnable {
+    @Override
+    public void run() {
+      for (int i =0; i< 10; i++) {
+        try {
+          Thread.sleep(3000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        try {
+          blockingDeque.take();
+          count --;
+          System.out.println(Thread.currentThread().getName() + " consumer number: " + count);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+
+  public static void main(String[] args) {
+    ProducerConsumer03 producerConsumer03 = new ProducerConsumer03();
+    new Thread(producerConsumer03.new Producer()).start();
+    new Thread(producerConsumer03.new Consumer()).start();
+    new Thread(producerConsumer03.new Producer()).start();
+    new Thread(producerConsumer03.new Consumer()).start();
+    new Thread(producerConsumer03.new Producer()).start();
+    new Thread(producerConsumer03.new Consumer()).start();
+    new Thread(producerConsumer03.new Producer()).start();
+    new Thread(producerConsumer03.new Consumer()).start();
+  }
+
+}
+```
+
+### 4. 信号量Semaphore
+- 添加两个信号量notFull和notEmpty作为许可集；
+- 可以使用acquire()方法获得一个许可，当许可不足时会被阻塞，release()添加一个许可；
+- 加入了另外一个mutex信号量，维护生产者消费者之间的同步关系，保证生产者和消费者之间的交替进行
+
+
+``` java
+package BasicKnowleage;
+
+import java.util.concurrent.Semaphore;
+
+/** Method 4:  Semaphore **/
+public class ProducerConsumer04 {
+  private static Integer count = 0;
+  final Semaphore notFull = new Semaphore(10);
+  final Semaphore notEmpty = new Semaphore(0);
+  final Semaphore mutex = new Semaphore(1);
+
+  class Producer implements Runnable {
+    @Override
+    public void run() {
+      for (int i = 0; i < 10; i++) {
+        try {
+          Thread.sleep(3000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        try {
+          notFull.acquire();
+          mutex.acquire();
+          count ++;
+          System.out.println(Thread.currentThread().getName() + " producer number: " + count);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        } finally {
+          notFull.release();
+          mutex.release();
+        }
+      }
+    }
+  }
+
+  class Consumer implements Runnable {
+    @Override
+    public void run() {
+      for (int i =0; i< 10; i++) {
+        try {
+          Thread.sleep(3000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        try {
+          notEmpty.acquire();
+          mutex.acquire();
+          count --;
+          System.out.println(Thread.currentThread().getName() + " consumer number: " + count);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        } finally {
+          notEmpty.release();
+          mutex.release();
+        }
+      }
+    }
+  }
+
+  public static void main(String[] args) {
+    ProducerConsumer04 producerConsumer04 = new ProducerConsumer04();
+    new Thread(producerConsumer04.new Producer()).start();
+    new Thread(producerConsumer04.new Consumer()).start();
+    new Thread(producerConsumer04.new Producer()).start();
+    new Thread(producerConsumer04.new Consumer()).start();
+    new Thread(producerConsumer04.new Producer()).start();
+    new Thread(producerConsumer04.new Consumer()).start();
+    new Thread(producerConsumer04.new Producer()).start();
+    new Thread(producerConsumer04.new Consumer()).start();
+  }
+}
+
+```
+ 
+### 5. 管道输入输出流PipedInputStream和PipedOutputStream
+
+- 先创建一个管道输入流和管道输出流，然后将输入流和输出流进行连接
+- 生产者线程往管道输出流中写入数据，消费者在管道输入流中读取数据，这样就可以实现了不同线程间的相互通讯
+- **注意**：这种方式在生产者和生产者、消费者和消费者之间不能保证同步，也就是说在一个生产者和一个消费者的情况下是可以生产者和消费者之间交替运行的，多个生成者和多个消费者者之间则不行
+
+
+``` java
+package BasicKnowleage;
+
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+
+
+public class ProducerConsumer05 {
+  final PipedInputStream pipedInputStream = new PipedInputStream();
+  final PipedOutputStream pipedOutputStream = new PipedOutputStream();
+  {
+    try {
+      pipedInputStream.connect(pipedOutputStream);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  class Producer implements Runnable {
+    @Override
+    public void run() {
+        try {
+          while(true) {
+            Thread.sleep(1000);
+            int num = (int) (Math.random() * 255);
+            System.out.println(Thread.currentThread().getName() + " producer number: " + num);
+            pipedOutputStream.write(num);
+            pipedOutputStream.flush();
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+        } finally {
+          try {
+            pipedOutputStream.close();
+            pipedInputStream.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+  }
+  class Consumer implements Runnable {
+    @Override
+    public void run() {
+        try {
+          Thread.sleep(1000);
+          int num = pipedInputStream.read();
+          System.out.println(Thread.currentThread().getName() + " consumer number: " + num);
+        } catch (Exception e) {
+          e.printStackTrace();
+        } finally {
+          try {
+            pipedOutputStream.close();
+            pipedInputStream.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+
+  }
+
+  public static void main(String[] args) {
+    ProducerConsumer05 producerConsumer05 = new ProducerConsumer05();
+    new Thread(producerConsumer05.new Producer()).start();
+    new Thread(producerConsumer05.new Consumer()).start();
+  }
+}
+
+```
+
+## 简述 Spring AOP 的原理
+
+### 什么是AOP
+
+使用OOP面向对象编程有一些弊端，当需要为多个不具有继承关系的对象引入同一个公共行为时，例如日志、安全检测等，我们只有在每个对象里引入公共行为，这样程序中就产生了大量的重复代码，程序就不便于维护了。所以就有了一个面向对象编程的补充，即面向方面编程，AOP所关注的方向是横向的，不同于OOP的纵向。
+
+### 特点
+
+* 降低模块之间的耦合度
+* 使系统容易扩展
+* 更好的代码复用
+
+### 相关概念
+
+1.切面（Aspect）：一个关注点的模块化，这个关注点可能会横切多个对象。
+2.连接点（Joinpoint）：程序执行过程中某一行为。
+3.通知（Advice）：“切面”对于某个“连接点”所产生的动作。
+4.切入点（Pointcut）：匹配连接点的断言，在AOP中通知和一个切入点表达式关联。
+5.目标对象（Target Object）：被一个或者多个切面所通知的对象。
+6.AOP代理（AOP Proxy） 在Spring AOP有两种代理方式，JDK动态代理和CGLIB代理。
+
+### Spring AOP的原理
+
+Spring AOP采用的是动态代理，在运行期间对业务方法进行增强，所以不会生成新类。对于动态代理技术
+
+* Spring提供了两种方式来生成代理对象:JDKProxy和Cglib，具体使用哪种方式是由配置来决定。
+* 默认的策略是如果目标类是接口，则使用JDK动态代理技术，否则使用Cglib来生成代理。
+
+1.DK动态代理只能为接口创建动态代理实例，而不能对类创建动态代理。需要获得被目标类的接口信息（应用Java的反射技术），生成一个实现了代理接口的动态代理类（字节码），再通过反射机制获得动态代理类的构造函数，利用构造函数生成动态代理类的实例对象，在调用具体方法前调用invokeHandler方法来处理。
+2.CGLib动态代理需要依赖asm包，把被代理对象类的class文件加载进来，修改其字节码生成子类。但是Spring AOP基于注解配置的情况下，需要依赖于AspectJ包的标准注解，但是不需要额外的编译以及AspectJ的织入器，而基于XML配置不需要。
