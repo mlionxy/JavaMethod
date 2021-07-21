@@ -8,7 +8,7 @@
 
 * `20210712`[hashmap 和 hashtable 的区别是什么？](https://github.com/mlionxy/JavaMethod/tree/master/java)
 
-* `20210713`[HashMap 与 ConcurrentHashMap 的实现原理是怎样的？ConcurrentHashMap 是如何保证线程安全的？](https://github.com/mlionxy/JavaMethod/tree/master/java)
+* `20210713`[HashMap 与 ConcurrentHashMap 的实现原理是怎样的？ConcurrentHashMap 是如何保证线程安全的？](https://github.com/mlionxy/JavaMethod/tree/master/java##hashmap-与-concurrenthashmap-的实现原理是怎样的concurrenthashmap-是如何保证线程安全的)
 
 * `20210713`[简述 Java 的反射机制及其应用场景](https://github.com/mlionxy/JavaMethod/tree/master/java)
 
@@ -28,12 +28,16 @@
 
 * `20210717`[Java 线程间有多少通信方式？](https://github.com/mlionxy/JavaMethod/tree/master/java)
 
-* `20210718`[简述 ArrayList 与 LinkedList 的底层实现以及常见操作的时间复杂度](https://github.com/mlionxy/JavaMethod/tree/master/java)
+* `20210718`[简述 ArrayList 与 LinkedList 的底层实现以及常见操作的时间复杂度](https://github.com/mlionxy/JavaMethod/tree/master/java#简述-arraylist-与-linkedlist-的底层实现以及常见操作的时间复杂度)
 
-* `20210719`[简述 JVM 的内存模型 JVM 内存是如何对应到操作系统内存的？](https://github.com/mlionxy/JavaMethod/tree/master/java)
+* `20210719`[简述 JVM 的内存模型 JVM 内存是如何对应到操作系统内存的？](https://github.com/mlionxy/JavaMethod/tree/master/java#简述-jvm-的内存模型-jvm-内存是如何对应到操作系统内存的)
 
-* `20210719`[说说 List,Set,Map 三者的区别及如何选用？](https://github.com/mlionxy/JavaMethod/tree/master/java)
+* `20210719`[说说 List,Set,Map 三者的区别及如何选用？](https://github.com/mlionxy/JavaMethod/tree/master/java#说说-listsetmap-三者的区别及如何选用)
 
-* `20210719`[手写生产者消费者模型](https://github.com/mlionxy/JavaMethod/tree/master/java)
+* `20210720`[手写生产者消费者模型](https://github.com/mlionxy/JavaMethod/tree/master/java#手写生产者消费者模型)
 
-* `20210719`[简述 Spring AOP 的原理](https://github.com/mlionxy/JavaMethod/tree/master/java)
+* `20210720`[简述 Spring AOP 的原理](https://github.com/mlionxy/JavaMethod/tree/master/java#简述-spring-aop-的原理)
+
+* `20210721`[Java 线程池里的 arrayblockingqueue 与 linkedblockingqueue 的使用场景和区别](https://github.com/mlionxy/JavaMethod/tree/master/java)
+
+* `20210721`[Java中sleep()和wait()方法的区别](https://github.com/mlionxy/JavaMethod/tree/master/java)
