@@ -942,3 +942,44 @@ Spring AOP采用的是动态代理，在运行期间对业务方法进行增强�
 1. sleep 是 Thread 方法，而 wait 是 Object 的方法 
 1. sleep 不需要强制和 synchronized 配合使用，但 wait 需要 和 synchronized 一起用 
 2. sleep 在睡眠的同时，不会释放对象锁的，但 wait 在等待的时候会释放对象锁 
+
+## LinkedHashMap的原理，如何实现LRU
+
+### 实现原理
+
+- 1.LinkedHashMap继承自HashMap，所以它的底层仍然是基于拉链式散列结构。该结构由数组和链表+红黑树在此基础上LinkedHashMap增加了一条双向链表，保持遍历顺序和插入顺序一致的问题。
+- 2.在实现上，LinkedHashMap很多方法直接继承自HashMap（比如putremove方法就是直接用的父类的），仅为维护双向链表覆写了部分方法（get（）方法是重写的）。
+- 3.LinkedHashMap使用的键值对节点是Entity他继承了hashMap的Node,并新增了两个引用，分别是before和after。这两个引用的用途不难理解，也就是用于维护双向链表.
+- 4.链表的建立过程是在插入键值对节点时开始的，初始情况下，让LinkedHashMap的head和tail引用同时指向新节点，链表就算建立起来了。随后不断有新节点插入，通过将新节点接在tail引用指向节点的后面，即可实现链表的更新
+- 5.LinkedHashMap允许使用null值和null键，线程是不安全的，虽然底层使用了双线链表，但是增删相快了。因为他底层的Entity保留了hashMapnode的next属性。
+- 6.如何实现迭代有序？
+	重新定义了数组中保存的元素Entry（继承于HashMap.node)，该Entry除了保存当前对象的引用外，还保存了其上一个元素before和下一个元素after的引用，从而在哈希表的基础上又构成了双向链接列表。仍然保留next属性，所以既可像HashMap一样快速查找，
+	用next获取该链表下一个Entry，也可以通过双向链接，通过after完成所有数据的有序迭代.
+- 7.竟然inkHashMap的put方法是直接调用父类hashMap的，但在HashMap中，put方法插入的是HashMap内部类Node类型的节点，该类型的节点并不具备与LinkedHashMap内部类Entry及其子类型节点组成链表的能力。那么，LinkedHashMap是怎样建立链表的呢？
+	虽然linkHashMap调用的是hashMap中的put方法，但是linkHashMap重写了，了一部分方法，其中就有newNode(inthash,Kkey,Vvalue,Node<K,V>e)linkNodeLast(LinkedHashMap.Entry<K,V>p)
+	这两个方法就是第一个方法就是新建一个linkHasnMap的Entity方法，而linkNodeLast方法就是为了把Entity接在链表的尾部。
+- 8.链表节点的删除过程
+	与插入操作一样，LinkedHashMap删除操作相关的代码也是直接用父类的实现，但是LinkHashMap重写了removeNode()方法afterNodeRemoval（）方法，该removeNode方法在hashMap删除的基础上有调用了afterNodeRemoval回调方法。完成删除。
+	根据hash定位到桶位置，遍历链表或调用红黑树相关的删除方法，从LinkedHashMap维护的双链表中移除要删除的节点
+
+### LRU
+
+- 最近最久未使用策略，优先淘汰最久未使用的数据，也就是上次被访问时间距离现在最久的数据。该策略可以保证内存中的数据都是热点数据，也就是经常被访问的数据，从而保证缓存命中率。
+
+- LinkedHashMap中本身就实现了一个方法removeEldestEntry用于判断是否需要移除最不常读取的数，方法默认是直接返回false，不会移除元素，所以需要【重写该方法】，即当缓存满后就移除最不常用的数。
+	设定最大缓存空间 MAX_ENTRIES 为 3；
+	使用 LinkedHashMap 的构造函数将 accessOrder 设置为 true，开启 LRU 顺序；
+	覆盖 removeEldestEntry() 方法实现，在节点多于 MAX_ENTRIES 就会将最近最久未使用的数据移除
+
+## Spring中bean的生命周期
+
+- 1.实例化一个Bean
+- 2.按照Spring上下文对实例化的Bean进行配置
+- 3.如果这个Bean已经实现了BeanNameAware接口，会调用它实现的setBeanName(String)方法，此处传递的就是Spring配置文件中Bean的id值
+- 4.如果这个Bean已经实现了BeanFactoryAware接口，会调用它实现的setBeanFactory(setBeanFactory(BeanFactory)传递的是Spring工厂自身
+- 5.如果这个Bean已经实现了ApplicationContextAware接口，会调用setApplicationContext(ApplicationContext)方法，传入Spring上下文
+- 6.如果这个Bean关联了BeanPostProcessor接口，将会调用postProcessBeforeInitialization(Objectobj,Strings)方法，BeanPostProcessor经常被用作是Bean内容的更改，并且由于这个是在Bean初始化结束时调用那个的方法，也可以被应用于内存或缓存技术
+- 7.如果Bean在Spring配置文件中配置了init-method属性会自动调用其配置的初始化方法。
+- 8.如果这个Bean关联了BeanPostProcessor接口，将会调用postProcessAfterInitialization(Objectobj,Strings)方法.；
+- 9.当Bean不再需要时，会经过清理阶段，如果Bean实现了DisposableBean这个接口，会调用那个其实现的destroy()方法；
+- 10.如果这个Bean的Spring配置中配置了destroy-method属性，会自动调用其配置的销毁方法。
