@@ -45,3 +45,7 @@
 * `20210722`[LinkedHashMap的原理，如何实现LRU](https://github.com/mlionxy/JavaMethod/tree/master/java)
 
 * `20210722`[Spring中bean的生命周期](https://github.com/mlionxy/JavaMethod/tree/master/java)
+
+* `20210723`[简述 Java 中的自动装箱与拆箱](https://github.com/mlionxy/JavaMethod/tree/master/java)
+
+* `20210723`[SpringBoot 是如何进行自动配置的？](https://github.com/mlionxy/JavaMethod/tree/master/java)
