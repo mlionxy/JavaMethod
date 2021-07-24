@@ -49,3 +49,7 @@
 * `20210723`[简述 Java 中的自动装箱与拆箱](https://github.com/mlionxy/JavaMethod/tree/master/java)
 
 * `20210723`[SpringBoot 是如何进行自动配置的？](https://github.com/mlionxy/JavaMethod/tree/master/java)
+
+* `20210724`[简述 HashSet 实现原理](https://github.com/mlionxy/JavaMethod/tree/master/java)
+
+* `20210724`[高并发情景下，核心线程池该如何设置参数？](https://github.com/mlionxy/JavaMethod/tree/master/java)
