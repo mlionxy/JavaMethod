@@ -1065,3 +1065,52 @@ Spring AOP采用的是动态代理，在运行期间对业务方法进行增强�
 - 禁止使用Executors方来创建线程池，而应该手动 new ThreadPoolExecutor 来创建线程池。
 - 最重要的原因是：Executors 提供的很多方法默认使用的都是**无界的** LinkedBlockingQueue，高负载情境下，无界队列很容易导致 **OOM**，而 OOM 会导致所有请求都无法处理，这是致命问题。
 - 最典型的就是 newFixedThreadPool 和 newCachedThreadPool，可能因为资源耗尽导致 OOM 问题。
+
+## error 和 exception 的区别是什么
+
+### 1.异常分类
+Throwable是Java中所有错误和异常的超类。它的下一级是Error和Exception
+
+### 1.1 Error（错误）
+- Error是指程序运行时系统的内部错误和资源耗尽错误。程序不会抛出该类对象。
+- 如果出现了Error，代表程序运行时JVM出现了重大问题，比如常见的OutOfMemoryError（OOM），这时应当告知用户并尽量让程序安全结束。
+
+### 1.2 Exception（异常）
+Exception是指程序可以自身处理的异常。Exception又分为检查异常（CheckedException）和运行异常（RuntimeException）:
+
+- CheckedException：检查异常一般是外部错误，都发送在编译阶段，是我们在编码时应当可以预计会发生的异常情况，编译器通常会提示我们去捕获这些异常并进行处理。
+    - 我们可以通过try-catch来捕获或者throws语句来抛出，否则编译器会提示不通过。
+    - 常见的有：FileNotFoundException，SQLException，ClassNotFoundException。
+- RuntimeException：运行异常一般是Java虚拟机正常运行期间抛出的异常的超类，程序中可以处理这些异常，也可以不处理这些异常，编译器并不会提示我们来处理这些异常。
+    - 这些异常通常都是编码出现了错误导致的，我们应当尽量避免出现这些异常。
+    - 常见的有：NullPointerException（空指针），IndexOutOfBoundsException（下标越界），ClassCastException（类型强制转换异常）。
+
+## HTTP 中 GET 和 POST 区别
+
+### 1. 两种 HTTP 请求方法：GET 和 POST
+在客户机和服务器之间进行请求-响应时，两种最常被用到的方法是：GET 和 POST。
+
+- GET - 从指定的资源请求数据。
+- POST - 向指定的资源提交要被处理的数据。
+
+### 2. 比较 GET 与 POST
+- 后退按钮/刷新:  
+    - GET无害
+    - POST数据会被重新提交（浏览器应该告知用户数据会被重新提交）。
+- 缓存:   GET能被缓存, POST不能缓存
+- 编码类型:
+    - GET application/x-www-form-urlencoded 
+    - POST application/x-www-form-urlencoded or multipart/form-data。为二进制数据使用多重编码。
+- 历史: GET参数保留在浏览器历史中。POST参数不会保存在浏览器历史中。
+- 对数据长度的限制:
+    - 当发送数据时，GET 方法向 URL 添加数据；URL 的长度是受限制的（URL 的最大长度是 2048 个字符）。
+    - POST无限制。
+- 对数据类型的限制:
+    - GET只允许 ASCII 字符。
+    - POST没有限制。也允许二进制数据。
+- 安全性:
+    - 与 POST 相比，GET 的安全性较差，因为所发送的数据是 URL 的一部分。
+    - 在发送密码或其他敏感信息时绝不要使用 GET ！  POST 比 GET 更安全，因为参数不会被保存在浏览器历史或 web 服务器日志中。
+- 可见性:
+    - GET数据在 URL 中对所有人都是可见的。
+    - POST数据不会显示在 URL 中。
