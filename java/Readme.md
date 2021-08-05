@@ -9,6 +9,7 @@
 ```
 String m = new String("jack");
 ```
+
 先创建一个字符串，这时候"jack"有一个引用，就是m
 ```
 m = null;
